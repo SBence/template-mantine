@@ -1,0 +1,11 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  text-size-adjust: none;
+}
+
+body {
+  margin: 0;
+}
