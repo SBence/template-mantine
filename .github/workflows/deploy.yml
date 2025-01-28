@@ -14,7 +14,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
@@ -22,34 +22,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Node.js environment
+        uses: SBence/setup-node-workflow-yarn@master
         with:
           node-version: "*"
-          cache: "yarn"
 
-      - name: Install dependencies
-        run: yarn install
+      - name: Set up Pages
+        uses: actions/configure-pages@v5
+        id: pages
 
       - name: Build project
-        run: yarn run build --base=/${{ github.event.repository.name }}/
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Fix permissions
-        run: |
-          chmod -c -R +rX "_site/" | while read line; do
-            echo "::warning title=Invalid file permissions automatically fixed::$line"
-          done
+        run: yarn run build --outDir dist-ci --base=${{ steps.pages.outputs.base_path }}
+        env:
+          PUBLIC_URL: ${{ steps.pages.outputs.base_url }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./dist"
+          path: ./dist-ci
 
   deploy:
     needs: build
